@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ministry Registration Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #c8a84b;
+    --gold-dim: #8a6e2e;
+    --gold-faint: rgba(200,168,75,0.12);
+    --gold-border: rgba(200,168,75,0.22);
+    --cream: #f0e8d0;
+    --cream-dim: #c8bca0;
+    --bg: #0b0a10;
+    --bg2: #13111c;
+    --text-muted: #7a6848;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--cream);
+    font-family: 'EB Garamond', Georgia, serif;
+    overflow: hidden;
+  }
+
+  /* ── Setup overlay ── */
+  #setup {
+    position: fixed; inset: 0;
+    background: linear-gradient(160deg, #0e0c16 0%, #0b0a10 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 20px; z-index: 999; padding: 40px;
+  }
+
+  #setup.hidden { display: none; }
+
+  .setup-cross {
+    font-family: 'Cinzel', serif;
+    font-size: 28px; color: var(--gold);
+    letter-spacing: 0.2em; margin-bottom: 4px;
+  }
+
+  .setup-title {
+    font-family: 'Cinzel', serif;
+    font-size: 24px; font-weight: 700;
+    color: var(--cream); letter-spacing: 0.12em;
+    text-align: center;
+  }
+
+  .setup-sub {
+    font-size: 16px; font-style: italic;
+    color: var(--text-muted); text-align: center;
+    max-width: 560px; line-height: 1.7;
+  }
+
+  .setup-form {
+    display: flex; flex-direction: column;
+    gap: 12px; width: 100%; max-width: 560px;
+  }
+
+  .setup-label {
+    font-family: 'Cinzel', serif;
+    font-size: 11px; letter-spacing: 0.18em;
+    color: var(--gold-dim); text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+
+  .setup-input {
+    width: 100%; padding: 12px 16px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--gold-border);
+    border-radius: 8px;
+    color: var(--cream);
+    font-family: 'EB Garamond', serif; font-size: 16px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .setup-input:focus { border-color: var(--gold); }
+  .setup-input::placeholder { color: rgba(200,168,75,0.28); font-style: italic; }
+
+  .setup-row { display: flex; gap: 10px; }
+
+  .btn-primary {
+    padding: 13px 36px;
+    background: rgba(200,168,75,0.14);
+    border: 1px solid rgba(200,168,75,0.55);
+    border-radius: 8px; color: var(--gold);
+    font-family: 'Cinzel', serif; font-size: 14px;
+    letter-spacing: 0.1em; cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .btn-primary:hover { background: rgba(200,168,75,0.24); border-color: var(--gold); }
+
+  .btn-demo {
+    padding: 13px 28px;
+    background: transparent;
+    border: 1px solid rgba(200,168,75,0.2);
+    border-radius: 8px; color: var(--text-muted);
+    font-family: 'EB Garamond', serif; font-size: 15px;
+    cursor: pointer; transition: color 0.2s, border-color 0.2s;
+  }
+  .btn-demo:hover { color: var(--cream-dim); border-color: rgba(200,168,75,0.35); }
+
+  .setup-hint {
+    font-size: 13px; font-style: italic;
+    color: #5a4830; text-align: center;
+    max-width: 560px; line-height: 1.6;
+  }
+
+  .setup-error {
+    font-size: 14px; color: #c07050;
+    font-style: italic; text-align: center;
+    min-height: 18px;
+  }
+
+  /* ── Dashboard ── */
+  #dashboard {
+    width: 100vw; height: 100vh;
+    display: flex; flex-direction: column;
+    background: radial-gradient(ellipse 100% 60% at 50% -10%, #1c1530 0%, #0b0a10 55%);
+  }
+
+  #dashboard.hidden { display: none; }
+
+  /* Top bar */
+  .topbar {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 18px 40px 14px;
+    border-bottom: 1px solid var(--gold-border);
+    flex-shrink: 0;
+  }
+
+  .topbar-title {
+    font-family: 'Cinzel', serif;
+    font-size: 15px; font-weight: 600;
+    letter-spacing: 0.2em; color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .live-pill {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'EB Garamond', serif;
+    font-size: 14px; color: var(--text-muted); letter-spacing: 0.06em;
+  }
+  .live-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--gold);
+    animation: livepulse 1.8s ease-in-out infinite;
+  }
+  @keyframes livepulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+  .topbar-right {
+    display: flex; align-items: center; gap: 20px;
+  }
+
+  .total-count {
+    font-family: 'EB Garamond', serif;
+    font-size: 15px; color: var(--text-muted); letter-spacing: 0.04em;
+  }
+
+  .refresh-info {
+    font-family: 'EB Garamond', serif;
+    font-size: 13px; font-style: italic; color: #4a3820;
+  }
+
+  .btn-config {
+    background: transparent;
+    border: 1px solid rgba(200,168,75,0.2);
+    border-radius: 6px; color: #6a5030;
+    font-family: 'EB Garamond', serif; font-size: 13px;
+    padding: 5px 14px; cursor: pointer; letter-spacing: 0.05em;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .btn-config:hover { color: var(--gold); border-color: rgba(200,168,75,0.45); }
+
+  /* Main content */
+  .main {
+    flex: 1; display: flex;
+    flex-direction: column; align-items: center;
+    justify-content: center;
+    padding: 40px 60px 20px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Ministry heading */
+  .ministry-section {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 10px;
+    margin-bottom: 36px;
+    opacity: 0;
+    animation: slideUp 0.65s cubic-bezier(.22,1,.36,1) forwards;
+  }
+
+  @keyframes slideUp {
+    from { opacity:0; transform: translateY(24px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  @keyframes slideDown {
+    from { opacity:1; transform: translateY(0); }
+    to   { opacity:0; transform: translateY(-20px); }
+  }
+
+  .ministry-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 12px; letter-spacing: 0.35em;
+    color: var(--gold-dim); text-transform: uppercase;
+  }
+
+  .ministry-name {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(32px, 5vw, 62px);
+    font-weight: 700; color: var(--cream);
+    text-align: center; letter-spacing: 0.06em; line-height: 1.1;
+  }
+
+  .ministry-count-text {
+    font-family: 'EB Garamond', serif;
+    font-size: 18px; font-style: italic; color: var(--gold-dim);
+    letter-spacing: 0.05em;
+  }
+
+  .ornament-line {
+    display: flex; align-items: center; gap: 14px; margin-top: 4px;
+  }
+  .ornament-line::before, .ornament-line::after {
+    content: '';
+    flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+    min-width: 60px; max-width: 180px;
+  }
+  .ornament-diamond {
+    font-size: 10px; color: var(--gold); opacity: 0.7;
+  }
+
+  /* Names grid */
+  .names-section {
+    width: 100%; max-width: 1100px;
+    opacity: 0;
+    animation: slideUp 0.7s 0.1s cubic-bezier(.22,1,.36,1) forwards;
+  }
+
+  .names-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 10px 18px;
+  }
+
+  .name-card {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--gold-faint);
+    border: 1px solid var(--gold-border);
+    border-radius: 8px; padding: 10px 16px;
+    transition: background 0.2s;
+  }
+  .name-card:hover { background: rgba(200,168,75,0.18); }
+
+  .initials {
+    width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+    background: rgba(200,168,75,0.13);
+    border: 1px solid rgba(200,168,75,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Cinzel', serif; font-size: 12px; color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+
+  .name-text {
+    font-family: 'EB Garamond', serif;
+    font-size: 18px; color: var(--cream); line-height: 1.2;
+  }
+
+  /* Progress / dots */
+  .progress-section {
+    margin-top: 36px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 10px;
+    flex-shrink: 0;
+  }
+
+  .dots-row {
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+  }
+
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: rgba(200,168,75,0.18);
+    border: 1px solid rgba(200,168,75,0.28);
+    transition: background 0.4s, transform 0.3s;
+  }
+  .dot.active { background: var(--gold); transform: scale(1.4); }
+
+  .progress-track {
+    width: 360px; height: 2px;
+    background: rgba(200,168,75,0.12); border-radius: 2px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, #8a6020, #d4b860);
+    border-radius: 2px; transition: width 0.12s linear;
+  }
+
+  /* No data state */
+  .no-data {
+    font-family: 'EB Garamond', serif;
+    font-size: 20px; font-style: italic;
+    color: var(--text-muted); text-align: center;
+  }
+
+  /* Watermark cross */
+  .watermark {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    font-family: 'Cinzel', serif; font-size: 11px;
+    letter-spacing: 0.3em; color: rgba(200,168,75,0.12);
+    pointer-events: none; text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════ SETUP SCREEN ══════════════ -->
+<div id="setup">
+  <div class="setup-cross">✦</div>
+  <div class="setup-title">Ministry Registration Dashboard</div>
+  <div class="setup-sub">Enter your Google Sheets details and API key to display live event registrations on the big screen.</div>
+
+  <div class="setup-form">
+    <div>
+      <div class="setup-label">Google Sheets ID</div>
+      <input class="setup-input" id="inp-sheet-id" type="text"
+        placeholder="e.g. 1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" />
+    </div>
+    <div>
+      <div class="setup-label">Sheet / Tab Name (optional, default: Sheet1)</div>
+      <input class="setup-input" id="inp-sheet-name" type="text"
+        placeholder="Sheet1" />
+    </div>
+    <div>
+      <div class="setup-label">Google Sheets API Key</div>
+      <input class="setup-input" id="inp-api-key" type="password"
+        placeholder="AIza..." />
+    </div>
+    <div>
+      <div class="setup-label">Event Name (optional)</div>
+      <input class="setup-input" id="inp-event-name" type="text"
+        placeholder="e.g. Annual Church Gathering 2025" />
+    </div>
+    <div class="setup-row" style="justify-content:center; gap:12px; margin-top: 6px;">
+      <button class="btn-primary" onclick="startDashboard()">Begin ↗</button>
+      <button class="btn-demo" onclick="loadDemo()">Use demo data</button>
+    </div>
+  </div>
+
+  <div class="setup-hint">
+    Find your Sheet ID in the URL: docs.google.com/spreadsheets/d/<strong style="color:#6a5030">SHEET_ID</strong>/edit<br/>
+    Get an API key from <strong style="color:#6a5030">console.cloud.google.com</strong> → APIs & Services → Credentials.<br/>
+    Enable the <strong style="color:#6a5030">Google Sheets API</strong> in your project.
+  </div>
+  <div class="setup-error" id="setup-error"></div>
+</div>
+
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<div id="dashboard" class="hidden">
+  <div class="topbar">
+    <span class="topbar-title" id="dash-event-name">Ministry Registration</span>
+    <div class="live-pill"><div class="live-dot"></div> Live</div>
+    <div class="topbar-right">
+      <span class="total-count" id="dash-total">— registrants</span>
+      <span class="refresh-info" id="dash-refresh">—</span>
+      <button class="btn-config" onclick="openSetup()">⚙ Reconfigure</button>
+    </div>
+  </div>
+
+  <div class="main" id="main-area">
+    <div class="ministry-section" id="ministry-section">
+      <span class="ministry-eyebrow">✦ &nbsp; Ministry &nbsp; ✦</span>
+      <div class="ministry-name" id="dash-ministry-name">—</div>
+      <div class="ministry-count-text" id="dash-ministry-count"></div>
+      <div class="ornament-line"><span class="ornament-diamond">◆</span></div>
+    </div>
+
+    <div class="names-section" id="names-section">
+      <div class="names-grid" id="names-grid"></div>
+    </div>
+
+    <div class="progress-section">
+      <div class="dots-row" id="dots-row"></div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+
+    <div class="watermark" id="watermark-text"></div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────
+let cfg = { sheetId: '', sheetName: 'Sheet1', apiKey: '', eventName: '' };
+let rows = [];
+let ministryMap = {};
+let ministryKeys = [];
+let currentIdx = 0;
+let cycleTimer = null;
+let progressTimer = null;
+let fetchTimer = null;
+let progressVal = 0;
+const CYCLE_MS = 5000;
+const REFRESH_MS = 10000;
+
+// ── Demo data ──────────────────────────────────────────────────────────
+const DEMO_ROWS = [
+  { name: 'Sarah Al-Ansari',  ministries: ['Worship','Youth'] },
+  { name: 'James Thornton',   ministries: ['Hospitality','Worship'] },
+  { name: 'Miriam Hassan',    ministries: ['Children','Prayer'] },
+  { name: 'David Okafor',     ministries: ['Media','Youth'] },
+  { name: 'Grace Kim',        ministries: ['Worship','Prayer','Children'] },
+  { name: 'Elias Mansour',    ministries: ['Hospitality'] },
+  { name: 'Nadia Saleh',      ministries: ['Youth','Media'] },
+  { name: 'Thomas Reyes',     ministries: ['Prayer','Hospitality'] },
+  { name: 'Amira Fouad',      ministries: ['Children','Worship'] },
+  { name: 'Mark Patterson',   ministries: ['Media'] },
+  { name: 'Layla Ibrahim',    ministries: ['Youth','Prayer'] },
+  { name: 'Ruth Adeyemi',     ministries: ['Hospitality','Children'] },
+  { name: 'Samuel Haddad',    ministries: ['Worship','Media'] },
+  { name: 'Chioma Eze',       ministries: ['Prayer'] },
+  { name: 'Jonathan Blake',   ministries: ['Youth','Worship','Hospitality'] },
+];
+
+// ── Helpers ────────────────────────────────────────────────────────────
+function getInitials(name) {
+  const p = name.trim().split(/\s+/);
+  return p.length >= 2
+    ? (p[0][0] + p[p.length-1][0]).toUpperCase()
+    : name.slice(0,2).toUpperCase();
+}
+
+function buildMinistryMap(data) {
+  const map = {};
+  data.forEach(r => {
+    r.ministries.forEach(m => {
+      const k = m.trim();
+      if (!k) return;
+      if (!map[k]) map[k] = [];
+      map[k].push(r.name);
+    });
+  });
+  return map;
+}
+
+function setError(msg) {
+  document.getElementById('setup-error').textContent = msg;
+}
+
+// ── Google Sheets API fetch ────────────────────────────────────────────
+async function fetchFromAPI() {
+  const sheetName = cfg.sheetName || 'Sheet1';
+  const range = encodeURIComponent(`${sheetName}!A:B`);
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${range}?key=${cfg.apiKey}`;
+
+  const resp = await fetch(url);
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err?.error?.message || `HTTP ${resp.status}`);
+  }
+  const json = await resp.json();
+  const vals = json.values || [];
+
+  // Skip header row (row 0)
+  const parsed = [];
+  for (let i = 1; i < vals.length; i++) {
+    const row = vals[i];
+    if (!row || !row[0]) continue;
+    const name = row[0].trim();
+    const raw  = (row[1] || '').trim();
+    const ministries = raw ? raw.split(',').map(s => s.trim()).filter(Boolean) : [];
+    parsed.push({ name, ministries });
+  }
+  return parsed;
+}
+
+async function refreshData() {
+  try {
+    const newRows = await fetchFromAPI();
+    rows = newRows;
+    applyData();
+    const t = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    document.getElementById('dash-refresh').textContent = `Updated ${t}`;
+  } catch(e) {
+    document.getElementById('dash-refresh').textContent = `⚠ ${e.message}`;
+  }
+}
+
+function applyData() {
+  ministryMap  = buildMinistryMap(rows);
+  ministryKeys = Object.keys(ministryMap);
+  const total  = rows.length;
+  document.getElementById('dash-total').textContent =
+    `${total} ${total === 1 ? 'registrant' : 'registrants'}`;
+}
+
+// ── Rendering ──────────────────────────────────────────────────────────
+function renderMinistry(idx) {
+  if (!ministryKeys.length) {
+    document.getElementById('dash-ministry-name').textContent  = 'No data yet';
+    document.getElementById('dash-ministry-count').textContent = '';
+    document.getElementById('names-grid').innerHTML = '';
+    document.getElementById('dots-row').innerHTML = '';
+    return;
+  }
+
+  const key   = ministryKeys[idx];
+  const names = ministryMap[key] || [];
+
+  // Animate out then in
+  const ms = document.getElementById('ministry-section');
+  const ns = document.getElementById('names-section');
+  ms.style.animation = 'none'; ns.style.animation = 'none';
+  void ms.offsetWidth;
+  ms.style.animation = 'slideUp 0.65s cubic-bezier(.22,1,.36,1) forwards';
+  ns.style.animation = 'slideUp 0.70s 0.10s cubic-bezier(.22,1,.36,1) forwards';
+
+  document.getElementById('dash-ministry-name').textContent =
+    key.length > 32 ? key.slice(0,30)+'…' : key;
+  document.getElementById('dash-ministry-count').textContent =
+    names.length === 1 ? '1 registrant' : `${names.length} registrants`;
+
+  // Names
+  const grid = document.getElementById('names-grid');
+  grid.innerHTML = '';
+  names.forEach(name => {
+    const card = document.createElement('div');
+    card.className = 'name-card';
+    card.innerHTML =
+      `<div class="initials">${getInitials(name)}</div>` +
+      `<span class="name-text">${name}</span>`;
+    grid.appendChild(card);
+  });
+
+  // Dots
+  const dots = document.getElementById('dots-row');
+  dots.innerHTML = '';
+  ministryKeys.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === idx ? ' active' : '');
+    dots.appendChild(d);
+  });
+}
+
+function startCycle() {
+  clearInterval(cycleTimer);
+  clearInterval(progressTimer);
+  currentIdx = 0;
+  progressVal = 0;
+  document.getElementById('progress-fill').style.width = '0%';
+  renderMinistry(currentIdx);
+
+  progressTimer = setInterval(() => {
+    progressVal += 100 / (CYCLE_MS / 60);
+    if (progressVal > 100) progressVal = 100;
+    document.getElementById('progress-fill').style.width = progressVal + '%';
+  }, 60);
+
+  cycleTimer = setInterval(() => {
+    if (!ministryKeys.length) return;
+    currentIdx = (currentIdx + 1) % ministryKeys.length;
+    progressVal = 0;
+    document.getElementById('progress-fill').style.width = '0%';
+    renderMinistry(currentIdx);
+  }, CYCLE_MS);
+}
+
+// ── Setup flow ─────────────────────────────────────────────────────────
+async function startDashboard() {
+  const sheetId   = document.getElementById('inp-sheet-id').value.trim();
+  const sheetName = document.getElementById('inp-sheet-name').value.trim() || 'Sheet1';
+  const apiKey    = document.getElementById('inp-api-key').value.trim();
+  const eventName = document.getElementById('inp-event-name').value.trim();
+
+  if (!sheetId) { setError('Please enter your Google Sheet ID.'); return; }
+  if (!apiKey)  { setError('Please enter your Google Sheets API key.'); return; }
+  setError('Connecting to Google Sheets…');
+
+  cfg = { sheetId, sheetName, apiKey, eventName };
+
+  try {
+    rows = await fetchFromAPI();
+  } catch(e) {
+    setError('Error: ' + e.message); return;
+  }
+
+  if (!rows.length) {
+    setError('Sheet loaded but no rows found. Ensure row 1 is a header (Name, Ministries) and data starts from row 2.');
+    return;
+  }
+
+  launchDashboard(eventName);
+}
+
+function launchDashboard(eventName) {
+  applyData();
+
+  const title = eventName || 'Ministry Registration';
+  document.getElementById('dash-event-name').textContent = title.toUpperCase();
+  document.getElementById('watermark-text').textContent = title;
+
+  document.getElementById('setup').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+
+  startCycle();
+
+  clearInterval(fetchTimer);
+  if (cfg.apiKey) {
+    fetchTimer = setInterval(refreshData, REFRESH_MS);
+    const t = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    document.getElementById('dash-refresh').textContent = `Updated ${t}`;
+  } else {
+    document.getElementById('dash-refresh').textContent = 'Demo mode';
+  }
+}
+
+function loadDemo() {
+  cfg = { sheetId: '', sheetName: '', apiKey: '', eventName: '' };
+  rows = DEMO_ROWS;
+  const eventName = document.getElementById('inp-event-name').value.trim();
+  launchDashboard(eventName || 'Annual Gathering');
+  document.getElementById('dash-refresh').textContent = 'Demo mode';
+}
+
+function openSetup() {
+  clearInterval(cycleTimer);
+  clearInterval(progressTimer);
+  clearInterval(fetchTimer);
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('setup').classList.remove('hidden');
+  setError('');
+}
+</script>
+</body>
+</html>
