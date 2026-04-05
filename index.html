@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ministry Fair – Riyadh Locale Registration</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --orange:      #f07000;
+    --orange2:     #f59000;
+    --yellow:      #ffd040;
+    --teal:        #2a7fa8;
+    --teal-dark:   #1a5f80;
+    --teal-light:  #4aafd4;
+    --white:       #ffffff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    font-family: 'Nunito', sans-serif;
+    overflow: hidden;
+  }
+
+  /* ══ Sunburst background ══ */
+  .sunburst-bg {
+    position: fixed; inset: 0; z-index: 0;
+    background: #f07800; overflow: hidden;
+  }
+  .sunburst-rays {
+    position: absolute;
+    width: 300vmax; height: 300vmax;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: conic-gradient(
+      #f59000 0deg,  #f07000 10deg, #f59000 20deg, #f07000 30deg,
+      #f59000 40deg, #f07000 50deg, #f59000 60deg, #f07000 70deg,
+      #f59000 80deg, #f07000 90deg, #f59000 100deg,#f07000 110deg,
+      #f59000 120deg,#f07000 130deg,#f59000 140deg,#f07000 150deg,
+      #f59000 160deg,#f07000 170deg,#f59000 180deg,#f07000 190deg,
+      #f59000 200deg,#f07000 210deg,#f59000 220deg,#f07000 230deg,
+      #f59000 240deg,#f07000 250deg,#f59000 260deg,#f07000 270deg,
+      #f59000 280deg,#f07000 290deg,#f59000 300deg,#f07000 310deg,
+      #f59000 320deg,#f07000 330deg,#f59000 340deg,#f07000 350deg,
+      #f59000 360deg
+    );
+    animation: spin 80s linear infinite;
+    opacity: 0.5;
+  }
+  @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+  .sunburst-glow {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 60% 55% at 50% 50%,
+      rgba(255,220,60,0.6) 0%, rgba(255,140,0,0.1) 55%, transparent 75%);
+  }
+
+  /* ══ Setup screen ══ */
+  #setup {
+    position: fixed; inset: 0; z-index: 100;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 0; padding: 30px;
+  }
+  #setup.hidden { display: none; }
+
+  .setup-card {
+    background: rgba(255,255,255,0.97);
+    border-radius: 22px;
+    padding: 36px 42px;
+    width: 100%; max-width: 580px;
+    display: flex; flex-direction: column; gap: 14px;
+    box-shadow: 0 12px 50px rgba(180,70,0,0.3), 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  .setup-logo-row {
+    display: flex; align-items: center; gap: 13px; margin-bottom: 2px;
+  }
+  .setup-logo-circle {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; color: white; font-weight: 900; flex-shrink: 0;
+  }
+  .setup-org { display: flex; flex-direction: column; }
+  .setup-org-name {
+    font-size: 18px; font-weight: 900; color: var(--teal-dark); line-height: 1.1;
+  }
+  .setup-org-sub {
+    font-size: 11px; font-weight: 700; color: #aaa; letter-spacing: 0.1em; text-transform: uppercase;
+  }
+
+  .setup-divider {
+    height: 1px; background: #eee; margin: 0 -4px;
+  }
+
+  .setup-heading {
+    font-size: 17px; font-weight: 800; color: #333;
+  }
+  .setup-heading span { color: var(--orange); }
+
+  .setup-label {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.1em;
+    color: var(--teal-dark); text-transform: uppercase; margin-bottom: 5px;
+  }
+  .setup-input {
+    width: 100%; padding: 11px 14px;
+    border: 2px solid #e8ddd0;
+    border-radius: 10px;
+    font-family: 'Nunito', sans-serif; font-size: 15px;
+    color: #333; background: #fffaf5;
+    outline: none; transition: border-color 0.2s;
+  }
+  .setup-input:focus { border-color: var(--teal); }
+  .setup-input::placeholder { color: #ccc; }
+
+  .setup-btns { display: flex; gap: 10px; }
+  .btn-start {
+    flex: 1; padding: 13px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border: none; border-radius: 10px;
+    color: white; font-family: 'Nunito', sans-serif;
+    font-size: 15px; font-weight: 800; cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn-start:hover { opacity: 0.9; }
+  .btn-start:active { transform: scale(0.98); }
+
+  .btn-demo {
+    padding: 13px 22px;
+    background: rgba(240,112,0,0.08);
+    border: 2px solid rgba(240,112,0,0.3);
+    border-radius: 10px; color: var(--orange);
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    transition: background 0.2s;
+  }
+  .btn-demo:hover { background: rgba(240,112,0,0.15); }
+
+  .setup-hint {
+    font-size: 12px; color: #aaa; line-height: 1.75;
+  }
+  .setup-hint strong { color: var(--teal-dark); }
+  .setup-error { font-size: 13px; color: #c04020; font-weight: 700; min-height: 18px; }
+
+  /* ══ Dashboard ══ */
+  #dashboard {
+    position: fixed; inset: 0; z-index: 10;
+    display: flex; flex-direction: column;
+  }
+  #dashboard.hidden { display: none; }
+
+  /* Top teal bar */
+  .topbar {
+    background: linear-gradient(90deg, var(--teal-dark) 0%, #2d8db8 50%, var(--teal-dark) 100%);
+    padding: 12px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0; position: relative; z-index: 2;
+    border-bottom: 3px solid rgba(255,255,255,0.18);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  }
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
+  .topbar-logo {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: white; border: 2px solid rgba(255,255,255,0.6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; font-weight: 900; color: var(--teal-dark); flex-shrink: 0;
+  }
+  .topbar-titles { display: flex; flex-direction: column; line-height: 1.15; }
+  .topbar-locale {
+    font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.65);
+    letter-spacing: 0.18em; text-transform: uppercase;
+  }
+  .topbar-event {
+    font-size: 22px; font-weight: 900; color: white;
+    letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .topbar-event span { color: var(--yellow); }
+
+  .topbar-right { display: flex; align-items: center; gap: 16px; }
+  .live-chip {
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 20px; padding: 5px 14px;
+    font-size: 13px; font-weight: 800; color: white; letter-spacing: 0.05em;
+  }
+  .live-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: #6ef060;
+    animation: livepulse 1.6s ease-in-out infinite;
+  }
+  @keyframes livepulse { 0%,100%{opacity:1} 50%{opacity:0.15} }
+  .total-chip {
+    font-size: 15px; font-weight: 800; color: var(--yellow); letter-spacing: 0.02em;
+  }
+  .refresh-chip {
+    font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.45);
+  }
+  .btn-config {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.22);
+    border-radius: 8px; color: rgba(255,255,255,0.65);
+    font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700;
+    padding: 6px 14px; cursor: pointer; transition: background 0.2s;
+  }
+  .btn-config:hover { background: rgba(255,255,255,0.2); color: white; }
+
+  /* Bunting */
+  .bunting {
+    width: 100%; height: 46px; position: relative; z-index: 2;
+    flex-shrink: 0; overflow: hidden;
+  }
+  .bunting-rope {
+    position: absolute; top: 7px; left: 0; right: 0;
+    height: 2px; background: rgba(255,255,255,0.55);
+  }
+  .bunting-flags {
+    display: flex; align-items: flex-start;
+    position: absolute; top: 0; left: 0; padding: 0 8px;
+  }
+  .flag {
+    width: 0; height: 0;
+    border-left: 17px solid transparent;
+    border-right: 17px solid transparent;
+    border-top-width: 32px; border-top-style: solid;
+    margin: 0 3px;
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.22));
+  }
+
+  /* Main */
+  .main {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 16px 50px 10px; position: relative; z-index: 1;
+    overflow: hidden;
+  }
+
+  /* Ministry block */
+  .ministry-block {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 8px; margin-bottom: 24px;
+    opacity: 0;
+    animation: popUp 0.55s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  @keyframes popUp {
+    from { opacity:0; transform: scale(0.85) translateY(22px); }
+    to   { opacity:1; transform: scale(1) translateY(0); }
+  }
+
+  .ministry-eyebrow {
+    font-size: 13px; font-weight: 800;
+    color: var(--teal-dark); letter-spacing: 0.18em; text-transform: uppercase;
+    background: rgba(255,255,255,0.78); padding: 5px 22px; border-radius: 20px;
+  }
+
+  .ministry-name-wrap {
+    background: linear-gradient(100deg, var(--teal-dark) 0%, var(--teal) 60%, var(--teal-light) 100%);
+    border-radius: 18px; padding: 18px 56px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.22), 0 2px 8px rgba(0,0,0,0.12);
+    position: relative; overflow: hidden;
+  }
+  .ministry-name-wrap::after {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, transparent 100%);
+    border-radius: 18px 18px 0 0;
+  }
+  .ministry-name {
+    font-size: clamp(34px, 5.5vw, 70px);
+    font-weight: 900; color: white;
+    text-align: center; letter-spacing: 0.05em;
+    text-shadow: 0 3px 14px rgba(0,0,0,0.28);
+    text-transform: uppercase; line-height: 1.05;
+    position: relative; z-index: 1;
+  }
+
+  .ministry-count-badge {
+    font-size: 15px; font-weight: 800; color: white;
+    background: var(--orange);
+    padding: 6px 24px; border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(200,70,0,0.4);
+    letter-spacing: 0.04em;
+  }
+
+  /* Names grid */
+  .names-section {
+    width: 100%; max-width: 1200px;
+    opacity: 0;
+    animation: popUp 0.6s 0.12s cubic-bezier(.34,1.56,.64,1) forwards;
+  }
+  .names-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 10px 16px;
+  }
+  .name-card {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(255,255,255,0.87);
+    border-radius: 12px; padding: 10px 16px;
+    box-shadow: 0 3px 12px rgba(160,60,0,0.14);
+    transition: transform 0.15s, background 0.15s;
+  }
+  .name-card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.97); }
+  .initials {
+    width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--teal-light), var(--teal-dark));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 900; color: white; letter-spacing: 0.03em;
+  }
+  .name-text { font-size: 17px; font-weight: 700; color: #1a3a50; line-height: 1.2; }
+
+  /* Progress */
+  .progress-section {
+    margin-top: 22px; display: flex; flex-direction: column;
+    align-items: center; gap: 10px; flex-shrink: 0;
+  }
+  .dots-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(255,255,255,0.32); border: 2px solid rgba(255,255,255,0.5);
+    transition: background 0.4s, transform 0.3s;
+  }
+  .dot.active { background: white; transform: scale(1.55); border-color: var(--teal-dark); }
+  .progress-track {
+    width: 400px; height: 5px;
+    background: rgba(255,255,255,0.22); border-radius: 4px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--teal-light), white);
+    border-radius: 4px; transition: width 0.12s linear;
+  }
+
+  /* Bottom bar */
+  .datebar {
+    background: linear-gradient(90deg, var(--teal-dark), var(--teal), var(--teal-dark));
+    border-top: 3px solid rgba(255,255,255,0.18);
+    padding: 9px 36px;
+    display: flex; align-items: center; justify-content: center;
+    gap: 20px; flex-shrink: 0;
+    font-size: 14px; font-weight: 800; color: white;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.15);
+  }
+  .datebar-gem { color: var(--yellow); font-size: 16px; }
+</style>
+</head>
+<body>
+
+<div class="sunburst-bg">
+  <div class="sunburst-rays"></div>
+  <div class="sunburst-glow"></div>
+</div>
+
+<!-- ══════════════ SETUP ══════════════ -->
+<div id="setup">
+  <div class="setup-card">
+    <div class="setup-logo-row">
+      <div class="setup-logo-circle">✝</div>
+      <div class="setup-org">
+        <div class="setup-org-name">Riyadh Locale</div>
+        <div class="setup-org-sub">Pentecostal Missionary Church of Christ · 4th Watch</div>
+      </div>
+    </div>
+    <div class="setup-divider"></div>
+    <div class="setup-heading">Ministry Fair <span>Registration Dashboard</span></div>
+
+    <div>
+      <div class="setup-label">Google Sheet ID</div>
+      <input class="setup-input" id="inp-sheet-id" type="text"
+        placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" />
+    </div>
+    <div>
+      <div class="setup-label">Sheet / Tab Name <span style="color:#ccc;font-weight:500;font-size:10px;">(default: Sheet1)</span></div>
+      <input class="setup-input" id="inp-sheet-name" type="text" placeholder="Sheet1" />
+    </div>
+    <div>
+      <div class="setup-label">Google Sheets API Key</div>
+      <input class="setup-input" id="inp-api-key" type="password" placeholder="AIza..." />
+    </div>
+
+    <div class="setup-btns">
+      <button class="btn-start" onclick="startDashboard()">🚀 Launch Dashboard</button>
+      <button class="btn-demo" onclick="loadDemo()">Demo</button>
+    </div>
+
+    <div class="setup-hint">
+      Sheet ID is in the URL: docs.google.com/spreadsheets/d/<strong>SHEET_ID</strong>/edit<br/>
+      Get an API key at <strong>console.cloud.google.com</strong> → Credentials → Create API Key. Enable <strong>Google Sheets API</strong>.<br/>
+      Expected columns: <strong>A = Name &nbsp;|&nbsp; B = 1st Choice &nbsp;|&nbsp; C = 2nd Choice &nbsp;|&nbsp; D = 3rd Choice</strong><br/>
+      Dashboard groups everyone by their <strong>1st Choice (column B)</strong> only.
+    </div>
+    <div class="setup-error" id="setup-error"></div>
+  </div>
+</div>
+
+<!-- ══════════════ DASHBOARD ══════════════ -->
+<div id="dashboard" class="hidden">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo">✝</div>
+      <div class="topbar-titles">
+        <div class="topbar-locale">Riyadh Locale · 4th Watch · April 10, 2026</div>
+        <div class="topbar-event">Ministry <span>Fair</span></div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="live-chip"><div class="live-dot"></div> Live</div>
+      <div class="total-chip" id="dash-total">— registrants</div>
+      <div class="refresh-chip" id="dash-refresh">—</div>
+      <button class="btn-config" onclick="openSetup()">⚙ Reconfigure</button>
+    </div>
+  </div>
+
+  <div class="bunting">
+    <div class="bunting-rope"></div>
+    <div class="bunting-flags" id="bunting-flags"></div>
+  </div>
+
+  <div class="main">
+    <div class="ministry-block" id="ministry-block">
+      <div class="ministry-eyebrow">✦ &nbsp; Now Viewing Ministry &nbsp; ✦</div>
+      <div class="ministry-name-wrap">
+        <div class="ministry-name" id="dash-ministry-name">—</div>
+      </div>
+      <div class="ministry-count-badge" id="dash-ministry-count"></div>
+    </div>
+
+    <div class="names-section" id="names-section">
+      <div class="names-grid" id="names-grid"></div>
+    </div>
+
+    <div class="progress-section">
+      <div class="dots-row" id="dots-row"></div>
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+  </div>
+
+  <div class="datebar">
+    <span>April 10, 2026</span>
+    <span class="datebar-gem">◆</span>
+    <span>1:00 PM</span>
+    <span class="datebar-gem">◆</span>
+    <span>Ministry Registration</span>
+    <span class="datebar-gem">◆</span>
+    <span>Riyadh Locale</span>
+  </div>
+
+</div>
+
+<script>
+let cfg = { sheetId:'', sheetName:'Sheet1', apiKey:'' };
+let rows = [];
+let ministryMap = {};
+let ministryKeys = [];
+let currentIdx = 0;
+let cycleTimer = null, progressTimer = null, fetchTimer = null;
+let progressVal = 0;
+const CYCLE_MS = 5000, REFRESH_MS = 10000;
+
+const FLAG_COLORS = ['#3a9fd4','#e05030','#f0c040','#1a7f90','#e87020','#5abce0','#d04828','#f5b820','#2a8fb0'];
+
+const DEMO_ROWS = [
+  { name:'Sarah Al-Ansari',  firstChoice:'Worship' },
+  { name:'James Thornton',   firstChoice:'Hospitality' },
+  { name:'Miriam Hassan',    firstChoice:'Children' },
+  { name:'David Okafor',     firstChoice:'Media' },
+  { name:'Grace Kim',        firstChoice:'Worship' },
+  { name:'Elias Mansour',    firstChoice:'Hospitality' },
+  { name:'Nadia Saleh',      firstChoice:'Youth' },
+  { name:'Thomas Reyes',     firstChoice:'Prayer' },
+  { name:'Amira Fouad',      firstChoice:'Children' },
+  { name:'Mark Patterson',   firstChoice:'Media' },
+  { name:'Layla Ibrahim',    firstChoice:'Youth' },
+  { name:'Ruth Adeyemi',     firstChoice:'Hospitality' },
+  { name:'Samuel Haddad',    firstChoice:'Worship' },
+  { name:'Chioma Eze',       firstChoice:'Prayer' },
+  { name:'Jonathan Blake',   firstChoice:'Youth' },
+];
+
+function buildBunting() {
+  const el = document.getElementById('bunting-flags');
+  el.innerHTML = '';
+  const n = Math.ceil(window.innerWidth / 38) + 4;
+  for (let i = 0; i < n; i++) {
+    const f = document.createElement('div');
+    f.className = 'flag';
+    f.style.borderTopColor = FLAG_COLORS[i % FLAG_COLORS.length];
+    el.appendChild(f);
+  }
+}
+
+function getInitials(name) {
+  const p = name.trim().split(/\s+/);
+  return p.length >= 2 ? (p[0][0]+p[p.length-1][0]).toUpperCase() : name.slice(0,2).toUpperCase();
+}
+
+function buildMinistryMap(data) {
+  const map = {};
+  data.forEach(r => {
+    const k = (r.firstChoice||'').trim();
+    if (!k) return;
+    if (!map[k]) map[k] = [];
+    map[k].push(r.name);
+  });
+  return map;
+}
+
+function setError(msg) { document.getElementById('setup-error').textContent = msg; }
+
+async function fetchFromAPI() {
+  const sn = cfg.sheetName || 'Sheet1';
+  const range = encodeURIComponent(`${sn}!A:D`);
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${cfg.sheetId}/values/${range}?key=${cfg.apiKey}`;
+  const resp = await fetch(url);
+  if (!resp.ok) {
+    const err = await resp.json().catch(()=>({}));
+    throw new Error(err?.error?.message || `HTTP ${resp.status}`);
+  }
+  const json = await resp.json();
+  const vals = json.values || [];
+  const parsed = [];
+  for (let i = 1; i < vals.length; i++) {
+    const row = vals[i];
+    if (!row || !row[0]) continue;
+    const name = row[0].trim();
+    const firstChoice = (row[1]||'').trim();
+    if (!name) continue;
+    parsed.push({ name, firstChoice });
+  }
+  return parsed;
+}
+
+async function refreshData() {
+  try {
+    rows = await fetchFromAPI();
+    applyData();
+    const t = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('dash-refresh').textContent = `Updated ${t}`;
+  } catch(e) {
+    document.getElementById('dash-refresh').textContent = `⚠ ${e.message}`;
+  }
+}
+
+function applyData() {
+  ministryMap  = buildMinistryMap(rows);
+  ministryKeys = Object.keys(ministryMap);
+  const total  = rows.length;
+  document.getElementById('dash-total').textContent =
+    `${total} ${total===1?'registrant':'registrants'}`;
+}
+
+function reAnimate(id, css) {
+  const el = document.getElementById(id);
+  el.style.animation = 'none'; void el.offsetWidth; el.style.animation = css;
+}
+
+function renderMinistry(idx) {
+  if (!ministryKeys.length) {
+    document.getElementById('dash-ministry-name').textContent = 'No data yet';
+    document.getElementById('dash-ministry-count').textContent = '';
+    document.getElementById('names-grid').innerHTML = '';
+    document.getElementById('dots-row').innerHTML = '';
+    return;
+  }
+  const key   = ministryKeys[idx];
+  const names = ministryMap[key] || [];
+
+  reAnimate('ministry-block','popUp 0.55s cubic-bezier(.34,1.56,.64,1) forwards');
+  reAnimate('names-section', 'popUp 0.60s 0.12s cubic-bezier(.34,1.56,.64,1) forwards');
+
+  document.getElementById('dash-ministry-name').textContent = key.length>30?key.slice(0,28)+'…':key;
+  document.getElementById('dash-ministry-count').textContent =
+    names.length===1 ? '1 registrant' : `${names.length} registrants`;
+
+  const grid = document.getElementById('names-grid');
+  grid.innerHTML = '';
+  names.forEach(name => {
+    const c = document.createElement('div');
+    c.className = 'name-card';
+    c.innerHTML = `<div class="initials">${getInitials(name)}</div><span class="name-text">${name}</span>`;
+    grid.appendChild(c);
+  });
+
+  const dots = document.getElementById('dots-row');
+  dots.innerHTML = '';
+  ministryKeys.forEach((_,i) => {
+    const d = document.createElement('div');
+    d.className = 'dot'+(i===idx?' active':'');
+    dots.appendChild(d);
+  });
+}
+
+function startCycle() {
+  clearInterval(cycleTimer); clearInterval(progressTimer);
+  currentIdx = 0; progressVal = 0;
+  document.getElementById('progress-fill').style.width = '0%';
+  renderMinistry(currentIdx);
+
+  progressTimer = setInterval(() => {
+    progressVal += 100/(CYCLE_MS/60);
+    if (progressVal>100) progressVal=100;
+    document.getElementById('progress-fill').style.width = progressVal+'%';
+  }, 60);
+
+  cycleTimer = setInterval(() => {
+    if (!ministryKeys.length) return;
+    currentIdx = (currentIdx+1) % ministryKeys.length;
+    progressVal = 0;
+    document.getElementById('progress-fill').style.width = '0%';
+    renderMinistry(currentIdx);
+  }, CYCLE_MS);
+}
+
+async function startDashboard() {
+  const sheetId   = document.getElementById('inp-sheet-id').value.trim();
+  const sheetName = document.getElementById('inp-sheet-name').value.trim() || 'Sheet1';
+  const apiKey    = document.getElementById('inp-api-key').value.trim();
+  if (!sheetId) { setError('Please enter your Google Sheet ID.'); return; }
+  if (!apiKey)  { setError('Please enter your Google Sheets API key.'); return; }
+  setError('Connecting to Google Sheets…');
+  cfg = { sheetId, sheetName, apiKey };
+  try { rows = await fetchFromAPI(); }
+  catch(e) { setError('Error: '+e.message); return; }
+  if (!rows.length) {
+    setError('Sheet loaded but no rows found. Ensure row 1 is a header and data starts from row 2.');
+    return;
+  }
+  launchDashboard();
+}
+
+function launchDashboard() {
+  applyData(); buildBunting();
+  document.getElementById('setup').classList.add('hidden');
+  document.getElementById('dashboard').classList.remove('hidden');
+  startCycle();
+  clearInterval(fetchTimer);
+  if (cfg.apiKey) {
+    fetchTimer = setInterval(refreshData, REFRESH_MS);
+    const t = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('dash-refresh').textContent = `Updated ${t}`;
+  } else {
+    document.getElementById('dash-refresh').textContent = 'Demo mode';
+  }
+}
+
+function loadDemo() {
+  cfg = { sheetId:'', sheetName:'', apiKey:'' };
+  rows = DEMO_ROWS;
+  launchDashboard();
+  document.getElementById('dash-refresh').textContent = 'Demo mode';
+}
+
+function openSetup() {
+  clearInterval(cycleTimer); clearInterval(progressTimer); clearInterval(fetchTimer);
+  document.getElementById('dashboard').classList.add('hidden');
+  document.getElementById('setup').classList.remove('hidden');
+  setError('');
+}
+
+window.addEventListener('resize', () => {
+  if (!document.getElementById('dashboard').classList.contains('hidden')) buildBunting();
+});
+</script>
+</body>
+</html>
